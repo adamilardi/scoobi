@@ -22,9 +22,8 @@ import org.apache.hadoop.mapreduce.InputFormat
 import org.apache.hadoop.mapreduce.OutputFormat
 import org.apache.hadoop.mapreduce.TaskAttemptID
 import org.apache.hadoop.mapreduce.MapContext
-import org.apache.hadoop.mapreduce.task.MapContextImpl
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
+import org.apache.hadoop.mapreduce.TaskAttemptContext
 import scala.collection.immutable.VectorBuilder
 import scala.collection.JavaConversions._
 import scalaz.{Scalaz, State, Memo, Ordering => _}
@@ -66,7 +65,7 @@ object VectorMode {
       sink.outputConfigure(job)(conf)
 
       val tid = new TaskAttemptID()
-      val taskContext = new TaskAttemptContextImpl(job.getConfiguration, tid)
+      val taskContext = new TaskAttemptContext(job.getConfiguration, tid)
       val rw = outputFormat.getRecordWriter(taskContext)
       val oc = outputFormat.getOutputCommitter(taskContext)
 
@@ -115,9 +114,9 @@ object VectorMode {
 
     inputFormat.getSplits(job) foreach { split =>
       val tid = new TaskAttemptID()
-      val taskContext = new TaskAttemptContextImpl(job.getConfiguration, tid)
+      val taskContext = new TaskAttemptContext(job.getConfiguration, tid)
       val rr = inputFormat.createRecordReader(split, taskContext)
-      val mapContext: MapContext[K, V, _, _] = new MapContextImpl(job.getConfiguration, tid, rr, null, null, null, split)
+      val mapContext: MapContext[K, V, _, _] = new MapContext(job.getConfiguration, tid, rr, null, null, null, split)
 
       rr.initialize(split, taskContext)
       while (rr.nextKeyValue()) {
